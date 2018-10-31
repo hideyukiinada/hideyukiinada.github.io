@@ -1,0 +1,22 @@
+---
+excerpt_separator: <!--more-->
+---
+collections:
+  subjects:
+    output: true
+
+defaults:
+  - scope:
+      path: ""
+      type: "subjects"
+    values:
+      layout: "default"
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+    values:
+      layout: "default"
