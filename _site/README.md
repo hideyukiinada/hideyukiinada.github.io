@@ -1,0 +1,1 @@
+# hideyukiinada.github.io
