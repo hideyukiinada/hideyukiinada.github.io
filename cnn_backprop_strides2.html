@@ -2,13 +2,13 @@
 layout: math
 subject: math
 short_name: math
-title: Calculate CNN backprop with padding and strides=2
+title: Calculate CNN backprop with padding and stride is set to 2
 ---
 
 In this article, I'll discuss how you can calculate backprop for one layer of a convolutional neural network (CNN) when stride is set to two.
 I would like to thank Mr. Sujit Rai for explaining backpropagation calculation in his article <a href="https://medium.com/@2017csm1006/forward-and-backpropagation-in-convolutional-neural-network-4dfa96d7b37e">Forward And Backpropagation in Convolutional Neural Network</a> 
 in which backprop calculation for 3x3 input, 2x2 kernel, 2x2 output is discussed.  I got an idea to calculate
-backprop from this article and applied to calculating equations for 4x4 zero-padded input, 3x3 kernel, 2x2 output when strides=2 is used during front prop.   
+backprop from this article and applied to calculating equations for 4x4 zero-padded input, 3x3 kernel, 2x2 output when stride is set to 2 is used during front prop.   
 I was trying to be careful in coming up with equations and calculations, but if you see one, 
 please open an issue in <a href="https://github.com/hideyukiinada/ml">my ML repository</a>.
 Please note that any error in this article is mine.
@@ -21,8 +21,8 @@ This article is focused on a specific area of CNN backprop and knowledge in the 
 <li>Basic multi-variable calculus</li>
 </ul>
 <h2>1. Objectives</h2>
-Objectives of this article are to calculate gradient of overall loss with respect to the previous layer's
-activation as well as gradient of overall loss with respect to the weights stored in the 
+The objectives of this article are to calculate the gradient of overall loss with respect to the previous layer's
+activation as well as the gradient of overall loss with respect to the weights stored in the 
 convolutional kernel of the current layer when front prop of the layer was calculated by the following equation:
 \begin{equation}
 Z = zero\_pad(a_{prev}) *_{stride2} W
@@ -35,7 +35,7 @@ where
 <li>zero_pad is a function to put 0 around the matrix so that the convolution operation output will be the same size as the input matrix.</li>
 <li>\(W\) is the convolution kernel (filter).</li>
 <li>\(*\) is the convolution operator.</li>
-<li>\(*_{stride2}\) denotes the convolution operation with strides=2.</li>
+<li>\(*_{stride2}\) denotes the convolution operation with stride is set to 2.</li>
 </ul>
 
 Matrix form of each variable is given as the following:
@@ -130,7 +130,7 @@ This spefic calculation is an element-wise operation, so it is straightforward.
 \end{bmatrix}
 \end{equation}
 
-Objectives of backprop for this layer are to find the values for the following two matrices:
+The objectives of backprop for this layer are to find the values for the following two matrices:
 \begin{equation}
 \frac{\partial L}{\partial a_{prev}} = 
 \begin{bmatrix}
