@@ -642,7 +642,7 @@ where \(flip_{verthorz}(W) \) is an operator to flip the matrix both vertically 
 \frac{\partial L}{\partial a_{prev}} = zero\_pad(zero \_ interweave(\frac{\partial L}{\partial z})) * W_{2}
 \end{equation}
 
-This yields the same matrix as \( 62 \).
+This yields the same matrix as the equation \( (62) \).
 
 <h3>2.2. Calculate \(\frac{\partial L}{\partial W}\)</h3>
 Calculating \(\frac{\partial L}{\partial W}\) is similar to the steps above.
@@ -919,4 +919,4 @@ zero\_pad(a_{prev})  =
 \frac{\partial L}{\partial W} = zero\_pad(a_{prev}) * zero \_ interweave(\frac{\partial L}{\partial Z})
 \end{equation}
 
-This yields the same matrix as \( 91 \), and we are done.
+This yields the same matrix as the equation \( (91) \), and we are done.
