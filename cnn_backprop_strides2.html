@@ -1,44 +1,49 @@
-<html>
-<head>
-<script type="text/javascript">
-		MathJax.Hub.Config({
-			TeX: { equationNumbers: { autoNumber: "AMS" } }
-		});
-</script>
-<script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
-</head>
-<body>
-<h1>CNN backprop with padding and strides=2</h1>
+---
+layout: math
+subject: math
+short_name: math
+title: Calculate CNN backprop with padding and strides=2
+---
 
-Calculate the following
+In this article, I'll discuss how you can calculate backprop for one layer of a convolutional neural network (CNN) when stride is set to two.
+I would like to thank Mr. Sujit Rai for explaining backpropagation calculation in his article <a href="https://medium.com/@2017csm1006/forward-and-backpropagation-in-convolutional-neural-network-4dfa96d7b37e">Forward And Backpropagation in Convolutional Neural Network</a> 
+in which backprop calculation for 3x3 input, 2x2 kernel, 2x2 output is discussed.  I got an idea to calculate
+backprop from this article and applied to calculating equations for 4x4 zero-padded input, 3x3 kernel, 2x2 output when strides=2 is used during front prop.   
+I was trying to be careful in coming up with equations and calculations, but if you see one, 
+please open an issue in <a href="https://github.com/hideyukiinada/ml">my ML repository</a>.
+Please note that any error in this article is mine.
 
+<h2>0. Prerequisite</h2>
+This article is focused on a specific area of CNN backprop and knowledge in the following areas will be required as a prerequisite:
+<ul>
+<li>How forward prop is calculated for CNN including cases where padding is used and stride is not 1</li>
+<li>How backprop is calculated for a plain-vanilla multi-layer neural network</li>
+<li>Basic multi-variable calculus</li>
+</ul>
+<h2>1. Objectives</h2>
+Objectives of this article are to calculate gradient of overall loss with respect to the previous layer's
+activation as well as gradient of overall loss with respect to the weights stored in the 
+convolutional kernel of the current layer when front prop of the layer was calculated by the following equation:
 \begin{equation}
-\frac{\partial L}{\partial a_{prev}} = 
-\begin{bmatrix}
-		\frac{\partial L}{\partial a_{11}} & \frac{\partial L}{\partial a_{12}} & \frac{\partial L}{\partial a_{13}} & \frac{\partial L}{\partial a_{14}} \\
-		\frac{\partial L}{\partial a_{21}} & \frac{\partial L}{\partial a_{22}} & \frac{\partial L}{\partial a_{23}} & \frac{\partial L}{\partial a_{24}} \\
-		\frac{\partial L}{\partial a_{31}} & \frac{\partial L}{\partial a_{32}} & \frac{\partial L}{\partial a_{33}} & \frac{\partial L}{\partial a_{34}} \\
-		\frac{\partial L}{\partial a_{41}} & \frac{\partial L}{\partial a_{42}} & \frac{\partial L}{\partial a_{43}} & \frac{\partial L}{\partial a_{44}}
-\end{bmatrix}
+Z = zero\_pad(a_{prev}) *_{stride2} W
 \end{equation}
 
-\begin{equation}
-\frac{\partial L}{\partial W} = 
-\begin{bmatrix}
-\frac{\partial L}{\partial w_{11}} & \frac{\partial L}{\partial w_{12}} & \frac{\partial L}{\partial w_{13}}  \\
-\frac{\partial L}{\partial w_{21}} & \frac{\partial L}{\partial w_{22}} & \frac{\partial L}{\partial w_{23}}  \\
-\frac{\partial L}{\partial w_{31}} & \frac{\partial L}{\partial w_{32}} & \frac{\partial L}{\partial w_{33}} 
-\end{bmatrix}
-\end{equation}
+where
+<ul>
+<li>\(Z\) is the set of values of this layer before activation function (e.g. sigmoid) is applied.</li>
+<li>\(a_{prev}\) is previous layer's activation.</li>
+<li>zero\_pad is a function to put 0 around the matrix so that the convolution operation output will be the same size as the input matrix.</li>
+<li>\(W\) is the convolution kernel (filter).</li>
+<li>\(*\) is the convolution operator.</li>
+<li>\(*_{stride2}\) denotes the convolution operation with strides=2.</li>
+</ul>
 
-When below variables are known:
+Matrix form of each variable is given as the following:
 \begin{equation}
-\frac{\partial L}{\partial Z} = 
+Z = 
 \begin{bmatrix}
-\frac{\partial L}{\partial z_{11}} & \frac{\partial L}{\partial z_{12}}  \\
-\frac{\partial L}{\partial z_{21}} & \frac{\partial L}{\partial z_{22}}  \\
+		z_{11} & z_{12} \\
+		z_{21} & z_{22} 
 \end{bmatrix}
 \end{equation}
 
@@ -52,9 +57,8 @@ a_{prev} =
 \end{bmatrix}
 \end{equation}
 
-where zeropadded \( a_{prev} \) is defined as:
 \begin{equation}
-a_{prev padded}  = 
+zero\_pad(a_{prev}) = 
 \begin{bmatrix}
 		0 & 0 & 0 & 0 & 0 & 0 \\
 		0 & a_{11} & a_{12} & a_{13} & a_{14} & 0 \\
@@ -74,13 +78,7 @@ W =
 \end{bmatrix}
 \end{equation}
 
-\begin{equation}
-Z = 
-\begin{bmatrix}
-		z_{11} & z_{12} \\
-		z_{21} & z_{22} 
-\end{bmatrix}
-\end{equation}
+Each element of Z is expressed by the following equations.  Note that the convolution kernel W is shifted by two slots after each operation since stride is set to 2:
 
 \begin{equation}
 Z_{11} =  
@@ -110,10 +108,66 @@ a_{32} \cdot w_{21} + a_{33} \cdot w_{22} + a_{34} \cdot w_{23} +
 a_{42} \cdot w_{31} + a_{43} \cdot w_{32} + a_{44} \cdot w_{33}  
 \end{equation}
 
-Note that last row and column (all zeros) are not used in convolution.
+During a backprop, gradients of the loss are propagated from the final layer over each layer of the network.
+Specifically propagation will take in the form of \( \frac{\partial L}{\partial a} \) for this layer
+where
+<ul>
+<li>\(L\) is the loss calculated by the cost function of the network.
+<li>\(a\) is the activation of this layer.</li>
+</ul>
 
-<h2>Solution</h2>
-<h3>\( \frac{\partial L}{\partial a_{11}} \)</h3>
+Once you know \( \frac{\partial L}{\partial a}\), you can apply the following chain rule to calculate the gradient with respect to Z.
+This spefic calculation is an element-wise operation, so it is straightforward.
+\begin{equation}
+\frac{\partial L}{\partial Z} = \frac{\partial L}{\partial a} \cdot \frac{\partial a}{\partial Z}
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial Z} = 
+\begin{bmatrix}
+\frac{\partial L}{\partial z_{11}} & \frac{\partial L}{\partial z_{12}}  \\
+\frac{\partial L}{\partial z_{21}} & \frac{\partial L}{\partial z_{22}}  \\
+\end{bmatrix}
+\end{equation}
+
+Objectives of backprop for this layer are to find the values for the following two matrices:
+\begin{equation}
+\frac{\partial L}{\partial a_{prev}} = 
+\begin{bmatrix}
+		\frac{\partial L}{\partial a_{11}} & \frac{\partial L}{\partial a_{12}} & \frac{\partial L}{\partial a_{13}} & \frac{\partial L}{\partial a_{14}} \\
+		\frac{\partial L}{\partial a_{21}} & \frac{\partial L}{\partial a_{22}} & \frac{\partial L}{\partial a_{23}} & \frac{\partial L}{\partial a_{24}} \\
+		\frac{\partial L}{\partial a_{31}} & \frac{\partial L}{\partial a_{32}} & \frac{\partial L}{\partial a_{33}} & \frac{\partial L}{\partial a_{34}} \\
+		\frac{\partial L}{\partial a_{41}} & \frac{\partial L}{\partial a_{42}} & \frac{\partial L}{\partial a_{43}} & \frac{\partial L}{\partial a_{44}}
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial W} = 
+\begin{bmatrix}
+\frac{\partial L}{\partial w_{11}} & \frac{\partial L}{\partial w_{12}} & \frac{\partial L}{\partial w_{13}}  \\
+\frac{\partial L}{\partial w_{21}} & \frac{\partial L}{\partial w_{22}} & \frac{\partial L}{\partial w_{23}}  \\
+\frac{\partial L}{\partial w_{31}} & \frac{\partial L}{\partial w_{32}} & \frac{\partial L}{\partial w_{33}} 
+\end{bmatrix}
+\end{equation}
+
+<h2>2. Solution</h2>
+<h3>2.1. Calculate \(\frac{\partial L}{\partial a_{prev}}\)</h3>
+To find \(\frac{\partial L}{\partial a_{prev}}\), we just have to calculate each of 16 elements of the matrix \( (12) \).
+Note that for all the 16 equations below, the second equation is derived by substituting w for the partial
+derivative of z with respect to a.  This is done by differentiating both sides of equations
+\( (6) \) through \( (9) \) with respect to \( a \).
+
+Let's take an example of \( (6) \).
+Differentiating both sides of the equation with respect to \( a_{11} \) yields
+\begin{equation}
+\frac{\partial z_{11}}{\partial a_{11}} = w_{22}
+\end{equation}
+This is because all other terms on the right side will disappear during differentiation.
+
+<div class="spacer"></div>
+<h3>2.1. Calculate \(\frac{\partial L}{\partial a_{prev}}\)</h3>
+<h4>2.1.1. Calculate 16 elements</h4>
+<h5>\( \frac{\partial L}{\partial a_{11}} \)</h5>
 \begin{equation}
 \frac{\partial L}{\partial a_{11}} = 
 \frac{\partial L}{\partial z_{11}} \cdot \frac{\partial z_{11}}{\partial a_{11}} +
@@ -135,7 +189,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{11}} \cdot w_{22}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{12}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{12}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{12}} = 
@@ -159,7 +213,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{12}} \cdot w_{21}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{13}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{13}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{13}} = 
@@ -182,7 +236,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{12}} \cdot w_{22}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{14}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{14}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{14}} = 
@@ -205,7 +259,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{12}} \cdot w_{23}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{21}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{21}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{21}} = 
@@ -230,7 +284,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \end{equation}
 
 
-<h3>\( \frac{\partial L}{\partial a_{22}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{22}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{22}} = 
@@ -248,7 +302,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{22}} \cdot w_{11}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{23}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{23}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{23}} = 
@@ -273,7 +327,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \end{equation}
 
 
-<h3>\( \frac{\partial L}{\partial a_{24}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{24}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{24}} = 
@@ -297,7 +351,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{22}} \cdot w_{13}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{31}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{31}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{31}} = 
@@ -320,7 +374,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{21}} \cdot w_{22}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{32}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{32}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{32}} = 
@@ -344,7 +398,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{22}} \cdot w_{21}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{33}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{33}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{33}} = 
@@ -367,7 +421,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{22}} \cdot w_{22}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{34}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{34}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{34}} = 
@@ -391,7 +445,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \end{equation}
 
 
-<h3>\( \frac{\partial L}{\partial a_{41}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{41}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{41}} = 
@@ -414,7 +468,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{21}} \cdot w_{32}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{42}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{42}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{42}} = 
@@ -438,7 +492,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{22}} \cdot w_{31}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{43}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{43}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{43}} = 
@@ -461,7 +515,7 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial z_{22}} \cdot w_{32}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial a_{44}} \)</h3>
+<h5>\( \frac{\partial L}{\partial a_{44}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial a_{43}} = 
@@ -483,8 +537,8 @@ Note that last row and column (all zeros) are not used in convolution.
 \frac{\partial L}{\partial a_{44}} = 
 \frac{\partial L}{\partial z_{22}} \cdot w_{33}
 \end{equation}
-<hr>
-h1>CNN backprop with padding and strides=2</h1>
+
+Now if we put all the elements into a matrix, we will get: 
 
 \begin{equation}
 \frac{\partial L}{\partial a_{prev}} = 
@@ -533,43 +587,47 @@ h1>CNN backprop with padding and strides=2</h1>
 \end{bmatrix}
 \end{equation}
 
-<h2>Insert zero rows and columns into Z</h2>
+<h4>2.1.2. Simplifying the equations</h4>
+This looks hairy and seems hard to calculate.  However, you'll soon see that that's not the case.
 
+<h5>Step 1. Interweave \( \frac{\partial L}{\partial z} \) with zeros</h5>
+First step is to put a row and a column after every element of \( \frac{\partial L}{\partial z} \): 
 \begin{equation}
-Z = 
+\frac{\partial L}{\partial z} =
 \begin{bmatrix}
-		z_{11} & z_{12} \\
-		z_{21} & z_{22} 
+\frac{\partial L}{\partial z_{11}} & \frac{\partial L}{\partial z_{12}} \\
+\frac{\partial L}{\partial z_{21}} & \frac{\partial L}{\partial z_{22}}
 \end{bmatrix}
 \end{equation}
 
-
 \begin{equation}
-Z_{2} = 
+zero \_ interweave(\frac{\partial L}{\partial z}) = 
 \begin{bmatrix}
-		z_{11} & 0 & z_{12} & 0 \\
+\frac{\partial L}{\partial z_{11}} & 0 & \frac{\partial L}{\partial z_{12}} & 0 \\
 		0 & 0 & 0 & 0 \\
-		z_{21} & 0 & z_{22} & 0 \\
+		\frac{\partial L}{\partial z_{21}} & 0 & \frac{\partial L}{\partial z_{22}} & 0 \\
 		0 & 0 & 0 & 0
 \end{bmatrix}
 \end{equation}
 
-<h2>Zeropad Z</h2>
+<h5>Step 2. zero-pad along the edges</h5>
+Next step is to put zero along the edges.
+
 \begin{equation}
-Z_{3} = 
+zero\_pad(zero \_ interweave(\frac{\partial L}{\partial z})) = 
 \begin{bmatrix}
 		0 & 0 & 0 & 0 & 0 & 0 \\
-		0 & z_{11} & 0 & z_{12} & 0 & 0 \\
+		0 & \frac{\partial L}{\partial z_{11}}  & 0 & \frac{\partial L}{\partial z_{12}} & 0 & 0 \\
 		0 & 0 & 0 & 0 & 0 & 0 \\
-		0 & z_{21} & 0 & z_{22} & 0 & 0 \\
+		0 & \frac{\partial L}{\partial z_{21}}  & 0 & \frac{\partial L}{\partial z_{22}} & 0 & 0 \\
 		0 & 0 & 0 & 0 & 0 & 0 \\
 		0 & 0 & 0 & 0 & 0 & 0 \\
 \end{bmatrix}
 \end{equation}
 
-Flip W vertically and horizontally.
+<h5>Step 3. Flip W vertically and horizontally.</h5>
 \begin{equation}
-W_{2} = 
+W_{2} = flip_{verthorz}(W) =
 \begin{bmatrix}
 		w_{33} & w_{32} & w_{31}  \\
 		w_{23} & w_{22} & w_{21}  \\
@@ -577,12 +635,20 @@ W_{2} =
 \end{bmatrix}
 \end{equation}
 
+where \(flip_{verthorz}(W) \) is an operator to flip the matrix both vertically and horizontally. 
+
+<h5>Step 4. Convolve two matrices</h5>
 \begin{equation}
-\frac{\partial L}{\partial a_{prev}} = Z_{3} * W_{2}
+\frac{\partial L}{\partial a_{prev}} = zero\_pad(zero \_ interweave(\frac{\partial L}{\partial z})) * W_{2}
 \end{equation}
 
-<hr>
-<h3>\( \frac{\partial L}{\partial w_{11}} \)</h3>
+This yields the same matrix as \( 62 \).
+
+<h3>2.2. Calculate \(\frac{\partial L}{\partial W}\)</h3>
+Calculating \(\frac{\partial L}{\partial W}\) is similar to the steps above.
+We just have to calculate each of the 9 elements of the matrix \( (13) \) this time.
+<h4>2.2.1. Calculate 9 elements</h4>
+<h5>\( \frac{\partial L}{\partial w_{11}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial w_{11}} = 
@@ -605,7 +671,7 @@ W_{2} =
 \frac{\partial L}{\partial z_{22}} \cdot a_{22}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial w_{12}} \)</h3>
+<h5>\( \frac{\partial L}{\partial w_{12}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial w_{12}} = 
@@ -629,7 +695,7 @@ W_{2} =
 \frac{\partial L}{\partial z_{22}} \cdot a_{23}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial w_{13}} \)</h3>
+<h5>\( \frac{\partial L}{\partial w_{13}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial w_{13}} = 
@@ -653,7 +719,7 @@ W_{2} =
 \frac{\partial L}{\partial z_{22}} \cdot a_{24}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial w_{21}} \)</h3>
+<h5>\( \frac{\partial L}{\partial w_{21}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial w_{21}} = 
@@ -677,7 +743,7 @@ W_{2} =
 \frac{\partial L}{\partial z_{22}} \cdot a_{32}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial w_{22}} \)</h3>
+<h5>\( \frac{\partial L}{\partial w_{22}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial w_{22}} = 
@@ -695,7 +761,7 @@ W_{2} =
 \frac{\partial L}{\partial z_{22}} \cdot a_{33}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial w_{23}} \)</h3>
+<h5>\( \frac{\partial L}{\partial w_{23}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial w_{23}} = 
@@ -713,7 +779,7 @@ W_{2} =
 \frac{\partial L}{\partial z_{22}} \cdot a_{34}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial w_{31}} \)</h3>
+<h5>\( \frac{\partial L}{\partial w_{31}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial w_{21}} = 
@@ -737,7 +803,7 @@ W_{2} =
 \frac{\partial L}{\partial z_{22}} \cdot a_{42}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial w_{32}} \)</h3>
+<h5>\( \frac{\partial L}{\partial w_{32}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial w_{32}} = 
@@ -755,7 +821,7 @@ W_{2} =
 \frac{\partial L}{\partial z_{22}} \cdot a_{43}
 \end{equation}
 
-<h3>\( \frac{\partial L}{\partial w_{33}} \)</h3>
+<h5>\( \frac{\partial L}{\partial w_{33}} \)</h5>
 
 \begin{equation}
 \frac{\partial L}{\partial w_{23}} = 
@@ -815,11 +881,29 @@ W_=
 
 \end{bmatrix}
 \end{equation}
-<hr>
-This means:
+
+<h4>2.2.2. Simplifying the equations</h4>
+This matrix also looks complicated, but we can simplify using the below steps.
+
+<h5>Step 1. Interweave \( \frac{\partial L}{\partial z} \) with zeros</h5>
+First step is to put a row and a column after every element of \( Z \).  This operation is the same as the one 
+discussed in 2.1.2.
 
 \begin{equation}
-a_{prev padded}  = 
+zero \_ interweave(\frac{\partial L}{\partial z}) = 
+\begin{bmatrix}
+\frac{\partial L}{\partial z_{11}} & 0 & \frac{\partial L}{\partial z_{12}} & 0 \\
+		0 & 0 & 0 & 0 \\
+		\frac{\partial L}{\partial z_{21}} & 0 & \frac{\partial L}{\partial z_{22}} & 0 \\
+		0 & 0 & 0 & 0
+\end{bmatrix}
+\end{equation}
+
+<h5>Step 2. Zero-pad \(a_{prev} \)</h5>
+Put zeros along the edges of \( a_{prev} \).  This is the same operation as in \( (4) \).
+
+\begin{equation}
+zero\_pad(a_{prev})  = 
 \begin{bmatrix}
 		0 & 0 & 0 & 0 & 0 & 0 \\
 		0 & a_{11} & a_{12} & a_{13} & a_{14} & 0 \\
@@ -830,29 +914,9 @@ a_{prev padded}  =
 \end{bmatrix}
 \end{equation}
 
-
-<h2>Zeropad Z</h2>
+<h5>Step 3. Convolve two matrices</h5>
 \begin{equation}
-\frac{\partial L}{\partial Z_{2}} = 
-\begin{bmatrix}
-
-		\frac{\partial L}{\partial z_{11}} & 0 & \frac{\partial L}{\partial z_{12}} & 0 \\
-		0 & 0 & 0 & 0 \\
-		\frac{\partial L}{\partial z_{21}} & 0 & \frac{\partial L}{\partial z_{22}} & 0 \\
-		0 & 0 & 0 & 0 \\
-\end{bmatrix}
+\frac{\partial L}{\partial W} = zero\_pad(a_{prev}) * zero \_ interweave(\frac{\partial L}{\partial Z})
 \end{equation}
 
-
-
-
-
-
-\begin{equation}
-\frac{\partial L}{\partial W} = zeropad(a_{prev}) * \frac{\partial L}{\partial Z_{2}}
-\end{equation}
-
-Note: operator * means convolution operation and does not mean an element-wise multiplication.
-The operand on the right side of the operator is the conv kernel.
-</body>
-</html>
+This yields the same matrix as \( 91 \), and we are done.
