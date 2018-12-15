@@ -9,7 +9,7 @@ In this article, I'll discuss how you can calculate backprop for one layer of a 
 I would like to thank Mr. Sujit Rai for explaining backpropagation calculation in his article <a href="https://medium.com/@2017csm1006/forward-and-backpropagation-in-convolutional-neural-network-4dfa96d7b37e">Forward And Backpropagation in Convolutional Neural Network</a> 
 in which backprop calculation for 3x3 input, 2x2 kernel, 2x2 output is discussed.  I got an idea to calculate
 backprop from this article and applied to calculating equations for 4x4 zero-padded input, 3x3 kernel, 2x2 output when stride is set to 2 is used during front prop.   
-I was trying to be careful in coming up with equations and calculations, but if you see one, 
+I was trying to be careful in coming up with equations and calculations, but if you see any error, 
 please open an issue in <a href="https://github.com/hideyukiinada/ml">my ML repository</a>.
 Please note that any error in this article is mine.
 
@@ -151,7 +151,6 @@ The objectives of backprop for this layer are to find the values for the followi
 \end{equation}
 
 <h2>2. Solution</h2>
-<h3>2.1. Calculate \(\frac{\partial L}{\partial a_{prev}}\)</h3>
 To find \(\frac{\partial L}{\partial a_{prev}}\), we just have to calculate each of 16 elements of the matrix \( (12) \).
 Note that for all the 16 equations below, the second equation is derived by substituting w for the partial
 derivative of z with respect to a.  This is done by differentiating both sides of equations
