@@ -672,7 +672,6 @@ Let's focus on first finding the dericvative weights for the first input channel
 \frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{11}^{(1)} +
 \frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{12}^{(1)}
 \end{equation}
-</hr>
 
 <h5>\(\frac{\partial L}{\partial w_{13}^{(1, 1)}}\)</h5>
 
@@ -708,7 +707,6 @@ Let's focus on first finding the dericvative weights for the first input channel
 \frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{12}^{(1)}
 \end{equation}
 
-</hr>
 <h5>\(\frac{\partial L}{\partial w_{21}^{(1, 1)}}\)</h5>
 
 \begin{equation}
@@ -744,7 +742,6 @@ Let's focus on first finding the dericvative weights for the first input channel
 \frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{21}^{(1)}
 \end{equation}
 
-</hr>
 <h5>\(\frac{\partial L}{\partial w_{22}^{(1, 1)}}\)</h5>
 
 \begin{equation}
@@ -782,7 +779,6 @@ Let's focus on first finding the dericvative weights for the first input channel
 \frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{22}^{(1)}
 \end{equation}
 
-</hr>
 <h5>\(\frac{\partial L}{\partial w_{23}^{(1, 1)}}\)</h5>
 
 \begin{equation}
@@ -818,7 +814,6 @@ Let's focus on first finding the dericvative weights for the first input channel
 \frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{22}^{(1)}
 \end{equation}
 
-</hr>
 <h5>\(\frac{\partial L}{\partial w_{31}^{(1, 1)}}\)</h5>
 
 \begin{equation}
@@ -853,7 +848,6 @@ Let's focus on first finding the dericvative weights for the first input channel
 \frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{21}^{(1)}
 \end{equation}
 
-</hr>
 <h5>\(\frac{\partial L}{\partial w_{32}^{(1, 1)}}\)</h5>
 
 \begin{equation}
@@ -889,7 +883,6 @@ Let's focus on first finding the dericvative weights for the first input channel
 \frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{22}^{(1)}
 \end{equation}
 
-</hr>
 <h5>\(\frac{\partial L}{\partial w_{33}^{(1, 1)}}\)</h5>
 
 \begin{equation}
@@ -922,4 +915,46 @@ Let's focus on first finding the dericvative weights for the first input channel
 \begin{equation}
 \frac{\partial L}{\partial w_{33}^{(1, 1)}} = 
 \frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{22}^{(1)}
+\end{equation}
+
+<hr>
+
+Putting this into a matrix form yields
+
+
+\begin{equation}
+\frac{\partial L}{\partial W^{(1,1)}} =
+\begin{bmatrix}
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{11}^{(1)} &
+
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{11}^{(1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{12}^{(1)} &
+
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{12}^{(1)} \\
+
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{11}^{(1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{21}^{(1)} &
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{11}^{(1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{12}^{(1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{21}^{(1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{22}^{(1)} &
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{12}^{(1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{22}^{(1)} \\
+
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{21}^{(1)} &
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{21}^{(1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{22}^{(1)} &
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{22}^{(1)}
+\end{bmatrix}
+\end{equation}
+
+With these, you can rewrite the matrix in \( 42 \) to
+
+\begin{equation}
+\frac{\partial L}{\partial W^{(1,1)}} = 
+zero\_pad(a_{prev}^{(1)}) * \frac{\partial L}{\partial Z^{(1)}}
 \end{equation}
