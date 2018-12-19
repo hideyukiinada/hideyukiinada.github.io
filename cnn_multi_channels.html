@@ -590,7 +590,9 @@ zero\_pad(\frac{\partial L}{\partial Z^{(1)}}) * W^{(1, 1)}_{flipped} +
 zero\_pad(\frac{\partial L}{\partial Z^{(2)}}) * W^{(1, 2)}_{flipped} 
 \end{equation}
 
-Similarly,
+<h4>2.1.2. Calculate \(\frac{\partial L}{\partial a_{prev}^{(2)}}\)</h4>
+
+You can use the same method to calculate \(\frac{\partial L}{\partial a_{prev}^{(2)}}\).
 \begin{equation}
 \frac{\partial L}{\partial a_{prev}^{(2)}} = 
 zero\_pad(\frac{\partial L}{\partial Z^{(1)}}) * W^{(2, 1)}_{flipped} +
@@ -1676,7 +1678,7 @@ zero\_pad(a_{prev}^{(2)}) * \frac{\partial L}{\partial Z^{(1)}}
 
 You can derive \( \frac{\partial L}{\partial W^{(2,2)}} \) the same way.
 
-<h1>Summary</h1>
+<h1>3. Summary</h1>
 Here is the summary
 
 \begin{equation}
