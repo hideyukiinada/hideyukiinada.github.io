@@ -582,7 +582,7 @@ zero\_pad(\frac{\partial L}{\partial Z^{(2)}}) =
 \end{bmatrix}
 \end{equation}
 
-With these, you can rewrite the matrix in \( 42 \) to
+With these, you can rewrite the matrix in \( 42 \) as
 
 \begin{equation}
 \frac{\partial L}{\partial a_{prev}^{(1)}} = 
@@ -952,7 +952,7 @@ Putting this into a matrix form yields
 \end{bmatrix}
 \end{equation}
 
-With these, you can rewrite the matrix in \( 42 \) to
+You can rewrite the matrix in \( 76 \) as
 
 \begin{equation}
 \frac{\partial L}{\partial W^{(1,1)}} = 
@@ -1309,16 +1309,373 @@ Putting this into a matrix form yields
 \end{bmatrix}
 \end{equation}
 
-With these, you can rewrite the matrix in \( 42 \) to
+You can rewrite the matrix in \( 105 \) as
 
 \begin{equation}
 \frac{\partial L}{\partial W^{(1,2)}} = 
 zero\_pad(a_{prev}^{(1)}) * \frac{\partial L}{\partial Z^{(2)}}
 \end{equation}
 
-You can derive \( \frac{\partial L}{\partial W^{(2, 1)}} \) and \( \frac{\partial L}{\partial W^{(2,2)}} \).
-Here is the summary
+<hr>
+<h4>2.2.3. Calculate \(\frac{\partial L}{\partial W^{(2, 1)}}\)</h4>
+Next, let's finding the derivative of loss with respect to weights for the second input channel and first output channel.
+<h5>\(\frac{\partial L}{\partial w_{11}^{(2, 1)}}\)</h5>
 
+\begin{equation}
+\frac{\partial L}{\partial w_{11}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial w_{11}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial w_{11}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial w_{11}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial w_{11}^{(2,1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial w_{11}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial w_{11}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial w_{11}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial w_{11}^{(2,1)}}
+
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{11}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{11}^{(2)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot 0
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{11}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{11}^{(2)}
+\end{equation}
+
+<h5>\(\frac{\partial L}{\partial w_{12}^{(2, 1)}}\)</h5>
+
+\begin{equation}
+\frac{\partial L}{\partial w_{12}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial w_{12}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial w_{12}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial w_{12}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial w_{12}^{(2,1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial w_{12}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial w_{12}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial w_{12}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial w_{12}^{(2,1)}}
+
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{12}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{11}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{12}^{(2)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot 0
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{12}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{11}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{12}^{(2)}
+\end{equation}
+
+<h5>\(\frac{\partial L}{\partial w_{13}^{(2, 1)}}\)</h5>
+
+\begin{equation}
+\frac{\partial L}{\partial w_{13}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial w_{13}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial w_{13}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial w_{13}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial w_{13}^{(2,1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial w_{13}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial w_{13}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial w_{13}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial w_{13}^{(2,1)}}
+
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{13}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{12}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot 0 + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot 0
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{13}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{12}^{(2)}
+\end{equation}
+
+<h5>\(\frac{\partial L}{\partial w_{21}^{(2, 1)}}\)</h5>
+
+\begin{equation}
+\frac{\partial L}{\partial w_{21}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial w_{21}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial w_{21}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial w_{21}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial w_{21}^{(2,1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial w_{21}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial w_{21}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial w_{21}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial w_{21}^{(2,1)}}
+
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{21}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{11}^{(2)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{21}^{(2)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot 0
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{21}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{11}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{21}^{(2)}
+\end{equation}
+
+<h5>\(\frac{\partial L}{\partial w_{22}^{(2, 1)}}\)</h5>
+
+\begin{equation}
+\frac{\partial L}{\partial w_{22}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial w_{22}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial w_{22}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial w_{22}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial w_{22}^{(2,1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial w_{22}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial w_{22}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial w_{22}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial w_{22}^{(2,1)}}
+
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{22}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{11}^{(2)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{12}^{(2)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{21}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{22}^{(2)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot 0
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{22}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{11}^{(2)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{12}^{(2)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{21}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{22}^{(2)}
+\end{equation}
+
+<h5>\(\frac{\partial L}{\partial w_{23}^{(2, 1)}}\)</h5>
+
+\begin{equation}
+\frac{\partial L}{\partial w_{23}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial w_{23}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial w_{23}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial w_{23}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial w_{23}^{(2,1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial w_{23}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial w_{23}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial w_{23}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial w_{23}^{(2,1)}}
+
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{23}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{12}^{(2)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{22}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot 0 + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot 0
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{23}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{12}^{(2)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{22}^{(2)}
+\end{equation}
+
+<h5>\(\frac{\partial L}{\partial w_{31}^{(2, 1)}}\)</h5>
+
+\begin{equation}
+\frac{\partial L}{\partial w_{31}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial w_{31}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial w_{31}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial w_{31}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial w_{31}^{(2,1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial w_{31}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial w_{31}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial w_{31}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial w_{31}^{(2,1)}}
+
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{31}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{21}^{(2)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot 0 + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot 0
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{31}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{21}^{(2)}
+\end{equation}
+
+<h5>\(\frac{\partial L}{\partial w_{32}^{(2, 1)}}\)</h5>
+
+\begin{equation}
+\frac{\partial L}{\partial w_{32}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial w_{32}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial w_{32}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial w_{32}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial w_{32}^{(2,1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial w_{32}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial w_{32}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial w_{32}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial w_{32}^{(2,1)}}
+
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{32}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{21}^{(2)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{22}^{(2)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot 0 + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot 0
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{32}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{21}^{(2)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{22}^{(2)}
+\end{equation}
+
+<h5>\(\frac{\partial L}{\partial w_{33}^{(2, 1)}}\)</h5>
+
+\begin{equation}
+\frac{\partial L}{\partial w_{33}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial w_{33}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial w_{33}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial w_{33}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial w_{33}^{(2,1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial w_{33}^{(2,1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial w_{33}^{(2,1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial w_{33}^{(2,1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial w_{33}^{(2,1)}}
+
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{33}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{22}^{(2)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot 0 + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot 0 +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot 0
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial w_{33}^{(2, 1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{22}^{(2)}
+\end{equation}
+
+<hr>
+
+Putting this into a matrix form yields
+
+
+\begin{equation}
+\frac{\partial L}{\partial W^{(2,1)}} =
+\begin{bmatrix}
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{11}^{(2)} &
+
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{11}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{12}^{(2)} &
+
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{12}^{(2)} \\
+
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{11}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{21}^{(2)} &
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{11}^{(2)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{12}^{(2)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{21}^{(2)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot a_{22}^{(2)} &
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{12}^{(2)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot a_{22}^{(2)} \\
+
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{21}^{(2)} &
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{21}^{(2)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot a_{22}^{(2)} &
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot a_{22}^{(2)}
+\end{bmatrix}
+\end{equation}
+
+With these, you can rewrite the matrix in \( 134 \) as
+
+\begin{equation}
+\frac{\partial L}{\partial W^{(2,1)}} = 
+zero\_pad(a_{prev}^{(2)}) * \frac{\partial L}{\partial Z^{(1)}}
+\end{equation}
+
+You can derive \( \frac{\partial L}{\partial W^{(2,2)}} \) the same way.
+Here is the summary
 
 \begin{equation}
 \frac{\partial L}{\partial W^{(1,1)}} = 
@@ -1339,7 +1696,3 @@ zero\_pad(a_{prev}^{(2)}) * \frac{\partial L}{\partial Z^{(1)}}
 \frac{\partial L}{\partial W^{(2,2)}} = 
 zero\_pad(a_{prev}^{(2)}) * \frac{\partial L}{\partial Z^{(2)}}
 \end{equation}
-
-
-
-<hr>
