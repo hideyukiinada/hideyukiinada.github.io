@@ -593,6 +593,232 @@ zero\_pad(\frac{\partial L}{\partial Z^{(2)}}) * W^{(1, 2)}_{flipped}
 <h4>2.1.2. Calculate \(\frac{\partial L}{\partial a_{prev}^{(2)}}\)</h4>
 
 You can use the same method to calculate \(\frac{\partial L}{\partial a_{prev}^{(2)}}\).
+
+\begin{equation}
+\frac{\partial L}{\partial a_{11}^{(2)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial a_{11}^{(2)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial a_{11}^{(2)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial a_{11}^{(2)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial a_{11}^{(2)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial a_{11}^{(2)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial a_{11}^{(2)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial a_{11}^{(2)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial a_{11}^{(2)}}
+
+\end{equation}
+
+Substituting \( w \) for the partial derivative of \( z \) with respect to \( a \) yields
+
+\begin{equation}
+\frac{\partial L}{\partial a_{11}^{(2)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{22}^{(2,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{21}^{(2,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{12}^{(2,1)}  +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{11}^{(2,1)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{22}^{(2,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{21}^{(2,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{12}^{(2,2)}  +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{11}^{(2,2)}
+
+\end{equation}
+<hr>
+<h5>\( \frac{\partial L}{\partial a_{12}^{(2)}} \)</h5>
+\begin{equation}
+\frac{\partial L}{\partial a_{12}^{(2)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial a_{12}^{(2)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial a_{12}^{(2)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial a_{12}^{(2)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial a_{12}^{(2)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial a_{12}^{(2)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial a_{12}^{(2)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial a_{12}^{(2)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial a_{12}^{(2)}}
+
+\end{equation}
+
+Substituting \( w \) for the partial derivative of \( z \) with respect to \( a \) yields
+
+\begin{equation}
+\frac{\partial L}{\partial a_{12}^{(2)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{23}^{(2,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{22}^{(2,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{13}^{(2,1)}  +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{12}^{(2,1)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{23}^{(2,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{22}^{(2,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{13}^{(2,2)}  +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{12}^{(2,2)}
+
+\end{equation}
+
+<hr>
+
+<h5>\( \frac{\partial L}{\partial a_{21}^{(2)}} \)</h5>
+\begin{equation}
+\frac{\partial L}{\partial a_{21}^{(2)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial a_{21}^{(2)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial a_{21}^{(2)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial a_{21}^{(2)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial a_{21}^{(2)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial a_{21}^{(2)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial a_{21}^{(2)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial a_{21}^{(2)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial a_{21}^{(2)}}
+
+\end{equation}
+
+Substituting \( w \) for the partial derivative of \( z \) with respect to \( a \) yields
+
+\begin{equation}
+\frac{\partial L}{\partial a_{21}^{(2)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{32}^{(2,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{31}^{(2,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{22}^{(2,1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{21}^{(2,1)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{32}^{(2,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{31}^{(2,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{22}^{(2,2)} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{21}^{(2,2)}
+
+\end{equation}
+
+<hr>
+<h5>\( \frac{\partial L}{\partial a_{22}^{(2)}} \)</h5>
+\begin{equation}
+\frac{\partial L}{\partial a_{22}^{(1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial a_{22}^{(2)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial a_{22}^{(2)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial a_{22}^{(2)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial a_{22}^{(2)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial a_{22}^{(2)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial a_{22}^{(2)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial a_{22}^{(2)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial a_{22}^{(2)}}
+
+\end{equation}
+
+Substituting \( w \) for the partial derivative of \( z \) with respect to \( a \) yields
+
+\begin{equation}
+\frac{\partial L}{\partial a_{22}^{(2)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{33}^{(2,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{32}^{(2,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{23}^{(2,1)}  +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{22}^{(2,1)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{33}^{(2,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{32}^{(2,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{23}^{(2,2)} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{22}^{(2,2)}
+
+\end{equation}
+
+Putting this into a matrix form yields
+
+
+\begin{equation}
+\frac{\partial L}{\partial a^{(2)}} =
+\begin{bmatrix}
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{22}^{(2,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{21}^{(2,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{12}^{(2,1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{11}^{(2,1)} + 
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{22}^{(2,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{21}^{(2,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{12}^{(2,2)} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{11}^{(2,2)}
+
+&
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{23}^{(2,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{22}^{(2,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{13}^{(2,1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{12}^{(2,1)} +
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{23}^{(2,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{22}^{(2,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{13}^{(2,2)} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{12}^{(2,2)}
+
+\\
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{32}^{(2,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{31}^{(2,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{22}^{(2,1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{21}^{(2,1)} +
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{32}^{(2,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{31}^{(2,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{22}^{(2,2)} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{21}^{(2,2)}
+&
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{33}^{(2,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{32}^{(2,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{23}^{(2,1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{22}^{(2,1)} + 
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{33}^{(2,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{32}^{(2,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{23}^{(2,2)} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{22}^{(2,2)}
+
+
+\end{bmatrix}
+\end{equation}
+
+As in my previous article, the matrix can be simpflied by expressing using other matrices with a little modification:
+
+\begin{equation}
+W^{(1, 1)}_{flipped} = flip_{verhorz}(W^{(1, 1)}) =
+\begin{bmatrix}
+		w_{33}^{(1, 1)} & w_{32}^{(1, 1)} & w_{31}^{(1, 1)}  \\
+		w_{23}^{(1, 1)} & w_{22}^{(1, 1)} & w_{21}^{(1, 1)}  \\
+		w_{13}^{(1, 1)} & w_{12}^{(1, 1)} & w_{11}^{(1, 1)} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+W^{(1, 2)}_{flipped} = flip_{verhorz}(W^{(1, 2)}) = 
+\begin{bmatrix}
+		w_{33}^{(1, 2)} & w_{32}^{(1, 2)} & w_{31}^{(1, 2)}  \\
+		w_{23}^{(1, 2)} & w_{22}^{(1, 2)} & w_{21}^{(1, 2)}  \\
+		w_{13}^{(1, 2)} & w_{12}^{(1, 2)} & w_{11}^{(1, 2)} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+zero\_pad(\frac{\partial L}{\partial Z^{(1)}}) = 
+\begin{bmatrix}
+0 & 0 & 0 & 0 \\
+0 & \frac{\partial L}{\partial z_{11}^{(1)}} & \frac{\partial L}{\partial z_{12}^{(1)}} & 0 \\
+0 & \frac{\partial L}{\partial z_{21}^{(1)}} & \frac{\partial L}{\partial z_{22}^{(1)}} & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+zero\_pad(\frac{\partial L}{\partial Z^{(2)}}) = 
+\begin{bmatrix}
+0 & 0 & 0 & 0 \\
+0 & \frac{\partial L}{\partial z_{11}^{(2)}} & \frac{\partial L}{\partial z_{12}^{(2)}} & 0 \\
+0 & \frac{\partial L}{\partial z_{21}^{(2)}} & \frac{\partial L}{\partial z_{22}^{(2)}} & 0 \\
+0 & 0 & 0 & 0
+\end{bmatrix}
+\end{equation}
+
+With these, you can rewrite the matrix in \( 42 \) as
+
+
+
 \begin{equation}
 \frac{\partial L}{\partial a_{prev}^{(2)}} = 
 zero\_pad(\frac{\partial L}{\partial Z^{(1)}}) * W^{(2, 1)}_{flipped} +
