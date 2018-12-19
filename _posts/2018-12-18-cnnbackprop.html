@@ -1,0 +1,23 @@
+---
+layout: math
+subject: math
+short_name: math
+title: Calculate back propagation for convolutional neural network
+---
+I'm in the middle of adding convolutional neural network to <a href="https://github.com/hideyukiinada/ml">my machine learning framework</a> that I built from scratch using numpy.
+I documented how I calculate back propagation in the following two pages:
+
+<ul>
+<li>
+    <a href="https://hideyukiinada.github.io/cnn_backprop_strides2.html">Calculate CNN backprop with padding and stride set to 2</a>
+</li>
+<li>
+<a href="https://hideyukiinada.github.io/cnn_multi_channels.html">Calculate CNN backprop with multiple input channels and multiple output channels</a>
+</li>
+</ul>
+
+For now, I'm setting the stride to 2 on a conv layer instead of using a max pooling layer to down-sample data therefore I'm covering calculation
+for this specific use case.
+
+Please note that CNN implementation in the repo is being debugged, and is not ready for the prime time yet.  As soon as I'm done, I'll 
+post an update.
