@@ -8,7 +8,7 @@ by Hide Inada
 <br><br>
 This article is a follow up of the <a href="./cnn_backprop_strides2.html">article</a> in which I discussed how you can calculate backprop
  for one layer of a convolutional neural network (CNN) when stride is set to two.
-In reality, one layer of CNN has multiple input channels and multiple output channels.  For example, if you want to 
+In reality, one convolutional layer most likely has multiple input channels and multiple output channels.  For example, if you want to 
 identify what objects are in a color photo, input to the first conv layer will be 3 channels for red, green and blue.
 A convolution kernel has a separate matrix that is used to convolve each input channel, in this case 3.
 During convolution, these 3 channels are summed depth-wise producing 1 matrix for the output channel.  
