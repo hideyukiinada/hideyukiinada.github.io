@@ -1,0 +1,600 @@
+---
+layout: math
+subject: math
+short_name: math
+title: Calculate CNN backprop with multiple input channels and multiple output channels 
+---
+by Hide Inada
+<br><br>
+This article is a follow up of the <a href="./cnn_backprop_strides2.html">article</a> in which I discussed how you can calculate backprop
+ for one layer of a convolutional neural network (CNN) when stride is set to two.
+In reality, one layer of CNN has multiple input channels and multiple output channels.  For example, if you want to 
+identify what objects are in a color photo, input to the first conv layer will be 3 channels for red, green and blue.
+A convolution kernel has a separate matrix that is used to convolve each input channel, in this case 3.
+During convolution, these 3 channels are summed depth-wise producing 1 matrix for the output channel.  
+When there is more than 1 output channel, the number of matrices is multiplied by the number of output channels. 
+Since there are 8 output channels, the kernel has the 8 sets of 3 channels which is 24 matrices.
+
+In this article and I will show you how to calculate backprop for
+<ul>
+<li>
+2 high x 2 wide x 2 channel input zero-padded to 4x4x2 input 
+</li>
+<li> 3 high x 3 wide kernel for 2 input channels and 2 output channels
+<li>
+2 high x 2 wide x 2 channel output
+</li>
+</ul>
+ 
+I was trying to be careful in coming up with equations and calculations, but if you see any error, 
+please open an issue in <a href="https://github.com/hideyukiinada/ml">my ML repository</a>.
+Please note that any error in this article is mine.
+
+<h2>1. Objectives</h2>
+The objectives of this article are to calculate the gradient of overall loss with respect to the previous layer's
+activation as well as the gradient of overall loss with respect to the weights stored in the 
+convolutional kernel of the current layer when front prop of the layer was calculated by the following general equation:
+\begin{equation}
+Z = zero\_pad(a_{prev}) * W
+\end{equation}
+
+where
+<ul>
+<li>\(Z\) is the set of values of this layer before activation function (e.g. sigmoid) is applied.</li>
+<li>\(a_{prev}\) is previous layer's activation.</li>
+<li>zero_pad is a function to put 0 around the matrix so that the convolution operation output will be the same size as the input matrix.</li>
+<li>\(W\) is the convolution kernel (filter).</li>
+<li>\(*\) is the convolution operator.  Note that convolution in machine learning means cross-correlation, and I'm following that naming convention.</li>
+</ul>
+
+Since we have multiple input channels and multiple output channels, the general equation becomes
+
+\begin{equation}
+Z^{(1)} = zero\_pad(a_{prev}^{(1)}) * W^{(1, 1)} + zero\_pad(a_{prev}^{(2)}) * W^{(2, 1)}
+\end{equation}
+
+\begin{equation}
+Z^{(2)} = zero\_pad(a_{prev}^{(2)}) * W^{(1, 2)} + zero\_pad(a_{prev}^{(2)}) * W^{(2, 2)}
+\end{equation}
+
+where
+<ul>
+	<li>Super script indicate the channel number.  For the kernel, first number denotes the input channel number followed by the output channel</li>
+</ul>
+
+Matrix form of each variable is given as the following.  
+\begin{equation}
+Z^{(1)} = 
+\begin{bmatrix}
+		z_{11}^{(1)} & z_{12}^{(1)} \\
+		z_{21}^{(1)} & z_{22}^{(1)} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+Z^{(2)} = 
+\begin{bmatrix}
+		z_{11}^{(2)} & z_{12}^{(2)} \\
+		z_{21}^{(2)} & z_{22}^{(2)} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+a_{prev}^{(1)} = 
+\begin{bmatrix}
+		a_{11}^{(1)} & a_{12}^{(1)}  \\
+		a_{21}^{(1)} & a_{22}^{(1)}  \\
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+a_{prev}^{(2)} = 
+\begin{bmatrix}
+		a_{11}^{(2)} & a_{12}^{(2)}  \\
+		a_{21}^{(2)} & a_{22}^{(2)}  \\
+\end{bmatrix}
+\end{equation}
+
+
+\begin{equation}
+zero\_pad(a_{prev}^{(1)}) = 
+\begin{bmatrix}
+		0 & 0 & 0 & 0 \\
+		0 & a_{11}^{(1)} & a_{12}^{(1)}  & 0 \\
+		0 & a_{21}^{(1)} & a_{22}^{(1)}  & 0 \\
+		0 & 0 & 0 & 0 \\
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+zero\_pad(a_{prev}^{(2)}) = 
+\begin{bmatrix}
+		0 & 0 & 0 & 0 \\
+		0 & a_{11}^{(2)} & a_{12}^{(2)}  & 0 \\
+		0 & a_{21}^{(2)} & a_{22}^{(2)}  & 0 \\
+		0 & 0 & 0 & 0 \\
+\end{bmatrix}
+\end{equation}
+
+
+\begin{equation}
+W^{(1, 1)} = 
+\begin{bmatrix}
+		w_{11}^{(1, 1)} & w_{12}^{(1, 1)} & w_{13}^{(1, 1)}  \\
+		w_{21}^{(1, 1)} & w_{22}^{(1, 1)} & w_{23}^{(1, 1)}  \\
+		w_{31}^{(1, 1)} & w_{32}^{(1, 1)} & w_{33}^{(1, 1)} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+W^{(1, 2)} = 
+\begin{bmatrix}
+		w_{11}^{(1, 2)} & w_{12}^{(1, 2)} & w_{13}^{(1, 2)}  \\
+		w_{21}^{(1, 2)} & w_{22}^{(1, 2)} & w_{23}^{(1, 2)}  \\
+		w_{31}^{(1, 2)} & w_{32}^{(1, 2)} & w_{33}^{(1, 2)} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+W^{(2, 1)} = 
+\begin{bmatrix}
+		w_{11}^{(2, 1)} & w_{12}^{(2, 1)} & w_{13}^{(2, 1)}  \\
+		w_{21}^{(2, 1)} & w_{22}^{(2, 1)} & w_{23}^{(2, 1)}  \\
+		w_{31}^{(2, 1)} & w_{32}^{(2, 1)} & w_{33}^{(2, 1)} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+W^{(2, 2)} = 
+\begin{bmatrix}
+		w_{11}^{(2, 2)} & w_{12}^{(2, 2)} & w_{13}^{(2, 2)}  \\
+		w_{21}^{(2, 2)} & w_{22}^{(2, 2)} & w_{23}^{(2, 2)}  \\
+		w_{31}^{(2, 2)} & w_{32}^{(2, 2)} & w_{33}^{(2, 2)} 
+\end{bmatrix}
+\end{equation}
+
+
+
+
+Each element of Z is expressed by the following equations.
+
+\begin{equation}
+Z_{11}^{(1)} =  
+0 \cdot w_{11}^{(1, 1)} + 0 \cdot      w_{12}^{(1, 1)} + 0 \cdot      w_{13}^{(1, 1)} +
+0 \cdot w_{21}^{(1, 1)} + a_{11}^{(1)} \cdot w_{22}^{(1, 1)} + a_{12}^{(1)} \cdot w_{23}^{(1, 1)} +
+0 \cdot w_{31}^{(1, 1)} + a_{21}^{(1)} \cdot w_{32}^{(1, 1)} + a_{22}^{(1)} \cdot w_{33}^{(1, 1)} + \\
+
+0 \cdot w_{11}^{(2, 1)} + 0 \cdot      w_{12}^{(2, 1)} + 0 \cdot      w_{13}^{(2, 1)} +
+0 \cdot w_{21}^{(2, 1)} + a_{11}^{(2)} \cdot w_{22}^{(2, 1)} + a_{12}^{(2)} \cdot w_{23}^{(2, 1)} +
+0 \cdot w_{31}^{(2, 1)} + a_{21}^{(2)} \cdot w_{32}^{(2, 1)} + a_{22}^{(2)} \cdot w_{33}^{(2, 1)}
+\end{equation}
+
+\begin{equation}
+Z_{12}^{(1)} =  
+0 \cdot w_{11}^{(1, 1)} + 0 \cdot      w_{12}^{(1, 1)} + 0 \cdot      w_{13}^{(1, 1)} +
+a_{11}^{(1)}  \cdot w_{21}^{(1, 1)} + a_{12}^{(1)} \cdot w_{22}^{(1, 1)} + 0 \cdot w_{23}^{(1, 1)} +
+a_{21}^{(1)}  \cdot w_{31}^{(1, 1)} + a_{22}^{(1)} \cdot w_{32}^{(1, 1)} + 0 \cdot w_{33}^{(1, 1)} + \\
+
+0 \cdot w_{11}^{(2, 1)} + 0 \cdot      w_{12}^{(2, 1)} + 0 \cdot      w_{13}^{(2, 1)} +
+a_{11}^{(2)} \cdot w_{21}^{(2, 1)} + a_{12}^{(2)} \cdot w_{22}^{(2, 1)} + 0 \cdot w_{23}^{(2, 1)} +
+a_{21}^{(2)} \cdot w_{31}^{(2, 1)} + a_{22}^{(2)} \cdot w_{32}^{(2, 1)} + 0 \cdot w_{33}^{(2, 1)}
+\end{equation}
+
+\begin{equation}
+Z_{21}^{(1)} =  
+0 \cdot w_{11}^{(1, 1)} + a_{11}^{(1)}  \cdot      w_{12}^{(1, 1)} + a_{12}^{(1)}  \cdot      w_{13}^{(1, 1)} +
+0 \cdot w_{21}^{(1, 1)} + a_{21}^{(1)} \cdot w_{22}^{(1, 1)} + a_{22}^{(1)} \cdot w_{23}^{(1, 1)} +
+0 \cdot w_{31}^{(1, 1)} + 0 \cdot w_{32}^{(1, 1)} + 0 \cdot w_{33}^{(1, 1)} + \\
+
+0 \cdot w_{11}^{(2, 1)} + a_{11}^{(2)}  \cdot      w_{12}^{(2, 1)} + a_{12}^{(2)}  \cdot      w_{13}^{(2, 1)} +
+0 \cdot w_{21}^{(2, 1)} + a_{21}^{(2)} \cdot w_{22}^{(2, 1)} + a_{22}^{(2)} \cdot w_{23}^{(2, 1)} + \\
+0 \cdot w_{31}^{(2, 1)} + 0 \cdot w_{32}^{(2, 1)} + 0 \cdot w_{33}^{(2, 1)}
+\end{equation}
+
+\begin{equation}
+Z_{22}^{(1)} =  
+a_{11}^{(1)}  \cdot w_{11}^{(1, 1)} + a_{12}^{(1)}  \cdot      w_{12}^{(1, 1)} + 0  \cdot      w_{13}^{(1, 1)} +
+a_{21}^{(1)} \cdot w_{21}^{(1, 1)} + a_{22}^{(1)} \cdot w_{22}^{(1, 1)} + 0 \cdot w_{23}^{(1, 1)} +
+0 \cdot w_{31}^{(1, 1)} + 0 \cdot w_{32}^{(1, 1)} + 0 \cdot w_{33}^{(1, 1)} + \\
+
+a_{11}^{(2)} \cdot w_{11}^{(2, 1)} + a_{12}^{(2)}  \cdot      w_{12}^{(2, 1)} + 0  \cdot      w_{13}^{(2, 1)} +
+a_{21}^{(2)} \cdot w_{21}^{(2, 1)} + a_{22}^{(2)} \cdot w_{22}^{(2, 1)} + 0 \cdot w_{23}^{(2, 1)} + \\
+0 \cdot w_{31}^{(2, 1)} + 0 \cdot w_{32}^{(2, 1)} + 0 \cdot w_{33}^{(2, 1)}
+\end{equation}
+
+\begin{equation}
+Z_{11}^{(2)} =  
+0 \cdot w_{11}^{(1, 2)} + 0 \cdot      w_{12}^{(1, 2)} + 0 \cdot      w_{13}^{(1, 2)} +
+0 \cdot w_{21}^{(1, 2)} + a_{11}^{(1)} \cdot w_{22}^{(1, 2)} + a_{12}^{(1)} \cdot w_{23}^{(1, 2)} +
+0 \cdot w_{31}^{(1, 2)} + a_{21}^{(1)} \cdot w_{32}^{(1, 2)} + a_{22}^{(1)} \cdot w_{33}^{(1, 2)} + \\
+
+0 \cdot w_{11}^{(2, 2)} + 0 \cdot      w_{12}^{(2, 2)} + 0 \cdot      w_{13}^{(2, 2)} +
+0 \cdot w_{21}^{(2, 2)} + a_{11}^{(2)} \cdot w_{22}^{(2, 2)} + a_{12}^{(2)} \cdot w_{23}^{(2, 2)} +
+0 \cdot w_{31}^{(2, 2)} + a_{21}^{(2)} \cdot w_{32}^{(2, 2)} + a_{22}^{(2)} \cdot w_{33}^{(2, 2)}
+\end{equation}
+
+\begin{equation}
+Z_{12}^{(2)} =  
+0 \cdot w_{11}^{(1, 2)} + 0 \cdot      w_{12}^{(1, 2)} + 0 \cdot      w_{13}^{(1, 2)} +
+a_{11}^{(1)}  \cdot w_{21}^{(1, 2)} + a_{12}^{(1)} \cdot w_{22}^{(1, 2)} + 0 \cdot w_{23}^{(1, 2)} +
+a_{21}^{(1)}  \cdot w_{31}^{(1, 2)} + a_{22}^{(1)} \cdot w_{32}^{(1, 2)} + 0 \cdot w_{33}^{(1, 2)} + \\
+
+0 \cdot w_{11}^{(2, 2)} + 0 \cdot      w_{12}^{(2, 2)} + 0 \cdot      w_{13}^{(2, 2)} +
+a_{11}^{(2)} \cdot w_{21}^{(2, 2)} + a_{12}^{(2)} \cdot w_{22}^{(2, 2)} + 0 \cdot w_{23}^{(2, 2)} +
+a_{21}^{(2)} \cdot w_{31}^{(2, 2)} + a_{22}^{(2)} \cdot w_{32}^{(2, 2)} + 0 \cdot w_{33}^{(2, 2)}
+\end{equation}
+
+\begin{equation}
+Z_{21}^{(2)} =  
+0 \cdot w_{11}^{(1, 2)} + a_{11}^{(1)}  \cdot      w_{12}^{(1, 2)} + a_{12}^{(1)}  \cdot      w_{13}^{(1, 2)} +
+0 \cdot w_{21}^{(1, 2)} + a_{21}^{(1)} \cdot w_{22}^{(1, 2)} + a_{22}^{(1)} \cdot w_{23}^{(1, 2)} +
+0 \cdot w_{31}^{(1, 2)} + 0 \cdot w_{32}^{(1, 2)} + 0 \cdot w_{33}^{(1, 2)} + \\
+
+0 \cdot w_{11}^{(2, 2)} + a_{11}^{(2)}  \cdot      w_{12}^{(2, 2)} + a_{12}^{(2)}  \cdot      w_{13}^{(2, 2)} +
+0 \cdot w_{21}^{(2, 2)} + a_{21}^{(2)} \cdot w_{22}^{(2, 2)} + a_{22}^{(2)} \cdot w_{23}^{(2, 2)} + \\
+0 \cdot w_{31}^{(2, 2)} + 0 \cdot w_{32}^{(2, 2)} + 0 \cdot w_{33}^{(2, 2)}
+\end{equation}
+
+\begin{equation}
+Z_{22}^{(2)} =  
+a_{11}^{(1)}  \cdot w_{11}^{(1, 2)} + a_{12}^{(1)}  \cdot      w_{12}^{(1, 2)} + 0  \cdot      w_{13}^{(1, 2)} +
+a_{21}^{(1)} \cdot w_{21}^{(1, 2)} + a_{22}^{(1)} \cdot w_{22}^{(1, 2)} + 0 \cdot w_{23}^{(1, 2)} +
+0 \cdot w_{31}^{(1, 2)} + 0 \cdot w_{32}^{(1, 2)} + 0 \cdot w_{33}^{(1, 2)} + \\
+
+a_{11}^{(2)} \cdot w_{11}^{(2, 2)} + a_{12}^{(2)}  \cdot      w_{12}^{(2, 2)} + 0  \cdot      w_{13}^{(2, 2)} +
+a_{21}^{(2)} \cdot w_{21}^{(2, 2)} + a_{22}^{(2)} \cdot w_{22}^{(2, 2)} + 0 \cdot w_{23}^{(2, 2)} + \\
+0 \cdot w_{31}^{(2, 2)} + 0 \cdot w_{32}^{(2, 2)} + 0 \cdot w_{33}^{(2, 2)}
+\end{equation}
+
+During a backprop, gradients of the loss are propagated from the final layer over each layer of the network.
+Specifically we have two output channels, so propagation will take in the form of \( \frac{\partial L}{\partial a^{(1)}} \) 
+and \( \frac{\partial L}{\partial a^{(2)}} \) for this layer
+where
+<ul>
+<li>\(L\) is the loss calculated by the cost function of the network.
+<li>\(a^{(1)}\) is the activation of the first channel of this layer.</li>
+<li>\(a^{(2)}\) is the activation of the second channel of this layer.</li>
+</ul>
+
+
+\begin{equation}
+\frac{\partial L}{\partial Z^{(1)}} = \frac{\partial L}{\partial a^{(1)}} \cdot \frac{\partial a^{(1)}}{\partial Z^{(1)}} +
+\frac{\partial L}{\partial a^{(2)}} \cdot \frac{\partial a^{(2)}}{\partial Z^{(1)}}
+\end{equation}
+
+Since
+\begin{equation}
+\frac{\partial a^{(2)}}{\partial Z^{(1)}} = 0
+\end{equation}
+
+as \( a^{(2)} \) only depends on \( Z^{(2)} \). Therefore
+\begin{equation}
+\frac{\partial L}{\partial Z^{(1)}} = \frac{\partial L}{\partial a^{(1)}} \cdot \frac{\partial a^{(1)}}{\partial Z^{(1)}}
+\end{equation}
+
+Similarly,
+\begin{equation}
+\frac{\partial L}{\partial Z^{(2)}} = \frac{\partial L}{\partial a^{(2)}} \cdot \frac{\partial a^{(2)}}{\partial Z^{(2)}}
+\end{equation}
+
+The above two calculations are done via element-wise operations, so it is straightforward to calculate the values of the below two derivatives.
+
+\begin{equation}
+\frac{\partial L}{\partial Z^{(1)}} = 
+\begin{bmatrix}
+\frac{\partial L}{\partial z_{11}^{(1)}} & \frac{\partial L}{\partial z_{12}^{(1)}}  \\
+\frac{\partial L}{\partial z_{21}^{(1)}} & \frac{\partial L}{\partial z_{22}^{(1)}}  \\
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial Z^{(2)}} = 
+\begin{bmatrix}
+\frac{\partial L}{\partial z_{11}^{(2)}} & \frac{\partial L}{\partial z_{12}^{(2)}}  \\
+\frac{\partial L}{\partial z_{21}^{(2)}} & \frac{\partial L}{\partial z_{22}^{(2)}}  \\
+\end{bmatrix}
+\end{equation}
+
+The objectives of backprop for this layer are to find the values for the following 6 matrices:
+\begin{equation}
+\frac{\partial L}{\partial a_{prev}^{(1)}} = 
+\begin{bmatrix}
+		\frac{\partial L}{\partial a_{11}^{(1)}} & \frac{\partial L}{\partial a_{12}^{(1)}} \\
+		\frac{\partial L}{\partial a_{21}^{(1)}} & \frac{\partial L}{\partial a_{22}^{(1)}}
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial a_{prev}^{(2)}} = 
+\begin{bmatrix}
+		\frac{\partial L}{\partial a_{11}^{(2)}} & \frac{\partial L}{\partial a_{12}^{(2)}} \\
+		\frac{\partial L}{\partial a_{21}^{(2)}} & \frac{\partial L}{\partial a_{22}^{(2)}}
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial W^{(1, 1)}} = 
+\begin{bmatrix}
+\frac{\partial L}{\partial w_{11}^{(1, 1)}} & \frac{\partial L}{\partial w_{12}^{(1, 1)}} & \frac{\partial L}{\partial w_{13}^{(1, 1)}}  \\
+\frac{\partial L}{\partial w_{21}^{(1, 1)}} & \frac{\partial L}{\partial w_{22}^{(1, 1)}} & \frac{\partial L}{\partial w_{23}^{(1, 1)}}  \\
+\frac{\partial L}{\partial w_{31}^{(1, 1)}} & \frac{\partial L}{\partial w_{32}^{(1, 1)}} & \frac{\partial L}{\partial w_{33}^{(1, 1)}} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial W^{(1, 2)}} = 
+\begin{bmatrix}
+\frac{\partial L}{\partial w_{11}^{(1, 2)}} & \frac{\partial L}{\partial w_{12}^{(1, 2)}} & \frac{\partial L}{\partial w_{13}^{(1, 2)}}  \\
+\frac{\partial L}{\partial w_{21}^{(1, 2)}} & \frac{\partial L}{\partial w_{22}^{(1, 2)}} & \frac{\partial L}{\partial w_{23}^{(1, 2)}}  \\
+\frac{\partial L}{\partial w_{31}^{(1, 2)}} & \frac{\partial L}{\partial w_{32}^{(1, 2)}} & \frac{\partial L}{\partial w_{33}^{(1, 2)}} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial W^{(2, 1)}} = 
+\begin{bmatrix}
+\frac{\partial L}{\partial w_{11}^{(2, 1)}} & \frac{\partial L}{\partial w_{12}^{(2, 1)}} & \frac{\partial L}{\partial w_{13}^{(2, 1)}}  \\
+\frac{\partial L}{\partial w_{21}^{(2, 1)}} & \frac{\partial L}{\partial w_{22}^{(2, 1)}} & \frac{\partial L}{\partial w_{23}^{(2, 1)}}  \\
+\frac{\partial L}{\partial w_{31}^{(2, 1)}} & \frac{\partial L}{\partial w_{32}^{(2, 1)}} & \frac{\partial L}{\partial w_{33}^{(2, 1)}} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+\frac{\partial L}{\partial W^{(2, 2)}} = 
+\begin{bmatrix}
+\frac{\partial L}{\partial w_{11}^{(2, 2)}} & \frac{\partial L}{\partial w_{12}^{(2, 2)}} & \frac{\partial L}{\partial w_{13}^{(2, 2)}}  \\
+\frac{\partial L}{\partial w_{21}^{(2, 2)}} & \frac{\partial L}{\partial w_{22}^{(2, 2)}} & \frac{\partial L}{\partial w_{23}^{(2, 2)}}  \\
+\frac{\partial L}{\partial w_{31}^{(2, 2)}} & \frac{\partial L}{\partial w_{32}^{(2, 2)}} & \frac{\partial L}{\partial w_{33}^{(2, 2)}} 
+\end{bmatrix}
+\end{equation}
+
+
+<h2>2. Solution</h2>
+To find \(\frac{\partial L}{\partial a_{prev}^{(1)}}\) and \(\frac{\partial L}{\partial a_{prev}^{(2)}}\), 
+we just have to calculate each of 4 elements of the matrix \( (28) \) and \( (29) \).
+Note that for all the 4 sets of equations below, each of second equation is derived by substituting w for the partial
+derivative of z with respect to a.  I discussed this in my previous post so please refer to that.
+
+<div class="spacer"></div>
+<h3>2.1. Calculate \(\frac{\partial L}{\partial a_{prev}}\)</h3>
+<h4>2.1.1. Calculate \(\frac{\partial L}{\partial a_{prev}^{(1)}}\)</h4>
+<h5>\( \frac{\partial L}{\partial a_{11}^{(1)}} \)</h5>
+Let's focus on first finding the values of the first channel.
+
+\begin{equation}
+\frac{\partial L}{\partial a_{11}^{(1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial a_{11}^{(1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial a_{11}^{(1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial a_{11}^{(1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial a_{11}^{(1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial a_{11}^{(1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial a_{11}^{(1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial a_{11}^{(1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial a_{11}^{(1)}}
+
+\end{equation}
+
+Substituting \( w \) for the partial derivative of \( z \) with respect to \( a \) yields
+
+\begin{equation}
+\frac{\partial L}{\partial a_{11}^{(1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{22}^{(1,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{21}^{(1,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{12}^{(1,1)}  +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{11}^{(1,1)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{22}^{(1,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{21}^{(1,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{12}^{(1,2)}  +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{11}^{(1,2)}
+
+\end{equation}
+<hr>
+<h5>\( \frac{\partial L}{\partial a_{12}^{(1)}} \)</h5>
+\begin{equation}
+\frac{\partial L}{\partial a_{12}^{(1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial a_{12}^{(1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial a_{12}^{(1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial a_{12}^{(1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial a_{12}^{(1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial a_{12}^{(1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial a_{12}^{(1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial a_{12}^{(1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial a_{12}^{(1)}}
+
+\end{equation}
+
+Substituting \( w \) for the partial derivative of \( z \) with respect to \( a \) yields
+
+\begin{equation}
+\frac{\partial L}{\partial a_{12}^{(1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{23}^{(1,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{22}^{(1,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{13}^{(1,1)}  +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{12}^{(1,1)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{23}^{(1,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{22}^{(1,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{13}^{(1,2)}  +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{12}^{(1,2)}
+
+\end{equation}
+
+<hr>
+
+<h5>\( \frac{\partial L}{\partial a_{21}^{(1)}} \)</h5>
+\begin{equation}
+\frac{\partial L}{\partial a_{21}^{(1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial a_{21}^{(1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial a_{21}^{(1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial a_{21}^{(1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial a_{21}^{(1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial a_{21}^{(1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial a_{21}^{(1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial a_{21}^{(1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial a_{21}^{(1)}}
+
+\end{equation}
+
+Substituting \( w \) for the partial derivative of \( z \) with respect to \( a \) yields
+
+\begin{equation}
+\frac{\partial L}{\partial a_{21}^{(1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{32}^{(1,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{31}^{(1,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{22}^{(1,1)}  +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{21}^{(1,1)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{32}^{(1,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{31}^{(1,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{22}^{(1,2)}  +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{21}^{(1,2)}
+
+\end{equation}
+
+<hr>
+<h5>\( \frac{\partial L}{\partial a_{22}^{(1)}} \)</h5>
+\begin{equation}
+\frac{\partial L}{\partial a_{22}^{(1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot \frac{\partial z_{11}^{(1)}}{\partial a_{22}^{(1)}} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot \frac{\partial z_{12}^{(1)}}{\partial a_{22}^{(1)}} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot \frac{\partial z_{21}^{(1)}}{\partial a_{22}^{(1)}} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot \frac{\partial z_{22}^{(1)}}{\partial a_{22}^{(1)}} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot \frac{\partial z_{11}^{(2)}}{\partial a_{22}^{(1)}} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot \frac{\partial z_{12}^{(2)}}{\partial a_{22}^{(1)}} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot \frac{\partial z_{21}^{(2)}}{\partial a_{22}^{(1)}} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot \frac{\partial z_{22}^{(2)}}{\partial a_{22}^{(1)}}
+
+\end{equation}
+
+Substituting \( w \) for the partial derivative of \( z \) with respect to \( a \) yields
+
+\begin{equation}
+\frac{\partial L}{\partial a_{22}^{(1)}} = 
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{33}^{(1,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{32}^{(1,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{23}^{(1,1)}  +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{22}^{(1,1)} + \\
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{33}^{(1,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{32}^{(1,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{23}^{(1,2)}  +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{22}^{(1,2)}
+
+\end{equation}
+
+Putting this into a matrix form yields
+
+
+\begin{equation}
+\frac{\partial L}{\partial a^{(1)}} =
+\begin{bmatrix}
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{22}^{(1,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{21}^{(1,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{12}^{(1,1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{11}^{(1,1)} + 
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{22}^{(1,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{21}^{(1,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{12}^{(1,2)} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{11}^{(1,2)}
+
+&
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{23}^{(1,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{22}^{(1,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{13}^{(1,1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{12}^{(1,1)} +
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{23}^{(1,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{22}^{(1,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{13}^{(1,2)} +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{12}^{(1,2)}
+
+\\
+
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{32}^{(1,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{31}^{(1,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{22}^{(1,1)} +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{21}^{(1,1)} +
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{32}^{(1,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{31}^{(1,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{22}^{(1,2)}  +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{21}^{(1,2)}
+&
+\frac{\partial L}{\partial z_{11}^{(1)}} \cdot w_{33}^{(1,1)} +
+\frac{\partial L}{\partial z_{12}^{(1)}} \cdot w_{32}^{(1,1)} +
+\frac{\partial L}{\partial z_{21}^{(1)}} \cdot w_{23}^{(1,1)}  +
+\frac{\partial L}{\partial z_{22}^{(1)}} \cdot w_{22}^{(1,1)} + 
+
+\frac{\partial L}{\partial z_{11}^{(2)}} \cdot w_{33}^{(1,2)} +
+\frac{\partial L}{\partial z_{12}^{(2)}} \cdot w_{32}^{(1,2)} +
+\frac{\partial L}{\partial z_{21}^{(2)}} \cdot w_{23}^{(1,2)}  +
+\frac{\partial L}{\partial z_{22}^{(2)}} \cdot w_{22}^{(1,2)}
+
+
+\end{bmatrix}
+\end{equation}
+
+As in my previous article, the matrix can be simpflied by expressing using other matrices with a little modification:
+
+\begin{equation}
+W^{(1, 1)}_{flipped} = flip_{verhorz}(W^{(1, 1)}) =
+\begin{bmatrix}
+		w_{33}^{(1, 1)} & w_{32}^{(1, 1)} & w_{31}^{(1, 1)}  \\
+		w_{23}^{(1, 1)} & w_{22}^{(1, 1)} & w_{21}^{(1, 1)}  \\
+		w_{13}^{(1, 1)} & w_{12}^{(1, 1)} & w_{11}^{(1, 1)} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+W^{(1, 2)}_{flipped} = flip_{verhorz}(W^{(1, 2)}) = 
+\begin{bmatrix}
+		w_{33}^{(1, 2)} & w_{32}^{(1, 2)} & w_{31}^{(1, 2)}  \\
+		w_{23}^{(1, 2)} & w_{22}^{(1, 2)} & w_{21}^{(1, 2)}  \\
+		w_{13}^{(1, 2)} & w_{12}^{(1, 2)} & w_{11}^{(1, 2)} 
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+zero\_pad(\frac{\partial L}{\partial Z^{(1)}}) = 
+\begin{bmatrix}
+0 & 0 & 0 & 0 \\
+0 & \frac{\partial L}{\partial z_{11}^{(1)}} & \frac{\partial L}{\partial z_{12}^{(1)}} & 0 \\
+0 & \frac{\partial L}{\partial z_{21}^{(1)}} & \frac{\partial L}{\partial z_{22}^{(1)}} & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+zero\_pad(\frac{\partial L}{\partial Z^{(2)}}) = 
+\begin{bmatrix}
+0 & 0 & 0 & 0 \\
+0 & \frac{\partial L}{\partial z_{11}^{(2)}} & \frac{\partial L}{\partial z_{12}^{(2)}} & 0 \\
+0 & \frac{\partial L}{\partial z_{21}^{(2)}} & \frac{\partial L}{\partial z_{22}^{(2)}} & 0 \\
+0 & 0 & 0 & 0
+\end{bmatrix}
+\end{equation}
+
+With these, you can rewrite the matrix in \( 42 \) to
+
+\begin{equation}
+\frac{\partial L}{\partial a_{prev}^{(1)}} = 
+zero\_pad(\frac{\partial L}{\partial Z^{(1)}}) * W^{(1, 1)}_{flipped} +
+zero\_pad(\frac{\partial L}{\partial Z^{(2)}}) * W^{(1, 2)}_{flipped} 
+\end{equation}
+
+Similarly,
+\begin{equation}
+\frac{\partial L}{\partial a_{prev}^{(2)}} = 
+zero\_pad(\frac{\partial L}{\partial Z^{(1)}}) * W^{(2, 1)}_{flipped} +
+zero\_pad(\frac{\partial L}{\partial Z^{(2)}}) * W^{(2, 2)}_{flipped} 
+\end{equation}
+
+Note that this is a just convolution operation done in a reverse way, and we are done with \( \frac{\partial L}{\partial a_{prev}} \)
