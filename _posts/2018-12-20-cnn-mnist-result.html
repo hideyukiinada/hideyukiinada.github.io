@@ -1,0 +1,20 @@
+---
+layout: math
+subject: math
+short_name: math
+title: Convolutional neural network accuracy against MNIST digit data
+---
+I have been working on building my own neural network framework since Nov. Lately I have been focusing on implementing convolutional neural network ("CNN") to add to the framework.
+Initially I built the CNN with a back of the envelope-type of calculation and it didn't work at all.  So I spent two days calculating and documenting the result which I posted earlier.
+
+At least for me, it is very hard to debug a neural network framework. This is because when neural network doesn't work, it could be due to hyperparameters, specific values weights were initialized for the session, or
+one or more bugs in my framework itself. 
+
+After spending significant amount of time debugging with a fear that I may not be able to get this to work, I finally found a few bugs in my framework.  Fixed them resolved the problem of loss not going down.
+
+I ran a 4-epoch training session against MNIST digit data overnight, and woke up to find the accuracy was 97.95%.  If you use a pre-built neural network framework, I believe the accuracy number could go higher. However 
+this is a number that I feel comfortable with declaring a victory for my project.
+
+If you want to try it, this is the specific script:
+
+<a href="https://github.com/hideyukiinada/ml/blob/master/examples/cnn_mnist_sgd_example">CNN MNIST Python script</a>.
